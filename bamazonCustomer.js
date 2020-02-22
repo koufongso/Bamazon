@@ -62,7 +62,7 @@ function placeOrder(idMax) {
                             name: "id",
                             message: "Please enter the product id.",
                             validate: function (input) {
-                                
+
                                 return input <= idMax && input > 0 && Number.isInteger(parseFloat(input));
                             }
                         },
@@ -87,8 +87,9 @@ function placeOrder(idMax) {
 function processOrder(order) {
     console.log("Processing your order...");
     // check if store has enough selected product
+    var id = order.id
     var query = "SELECT * FROM products WHERE item_id=?";
-    connection.query(query, [order.id], function (err, res) {
+    connection.query(query, [id], function (err, res) {
         if (err) throw err;
         // console.log(res);
         var amount = order.amount;
@@ -97,9 +98,9 @@ function processOrder(order) {
         if (res[0].stock_quantity >= amount) {
             // enough items
             console.log("-".repeat(45));
-            console.log("Your Order:\n%d x %s\nTotal: $%f",amount,res[0].product_name,total);
+            console.log("Your Order:\n%d x %s\nTotal: $"+total, amount, res[0].product_namen);
             console.log("-".repeat(45));
-            updateDB(res)
+            updateDB(id, amount);
         } else {
             // not enough items
             cancelOrder();
@@ -108,16 +109,34 @@ function processOrder(order) {
 }
 
 
-function updateDB(res) {
+function updateDB(id, amount) {
     console.log("updating database...");
-    connection.end();
+    var query = "UPDATE products SET stock_quantity=stock_quantity-? WHERE item_id=?";
+    connection.query(query, [amount, id], function (err) {
+        if (err) throw err;
+        console.log("database updated!");
+
+        inquirer
+            .prompt([{
+                type: "confirm",
+                name: "continue",
+                message: "Do you want to buy anything else?"
+            }])
+            .then(answers => {
+                if (answers.continue) {
+                    showItems();
+                } else {
+                    quit();
+                }
+            });
+    });
 }
 
 function cancelOrder() {
     inquirer
         .prompt([{
             type: "confirm",
-            name:"continue",
+            name: "continue",
             message: "Sorry, the products you chose has insufficient quantity! Order is canceled. Do you want to buy anything else?"
         }])
         .then(answers => {
@@ -126,7 +145,7 @@ function cancelOrder() {
             } else {
                 quit();
             }
-        })
+        });
 }
 
 function quit() {
