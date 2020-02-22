@@ -87,12 +87,19 @@ function placeOrder(idMax) {
 function processOrder(order) {
     console.log("Processing your order...");
     // check if store has enough selected product
-    var query = "SELECT stock_quantity FROM products WHERE item_id=?";
+    var query = "SELECT * FROM products WHERE item_id=?";
     connection.query(query, [order.id], function (err, res) {
         if (err) throw err;
-        if (res[0].stock_quantity >= order.amount) {
+        // console.log(res);
+        var amount = order.amount;
+        var unitPrice = res[0].price;
+        var total = (amount * unitPrice).toFixed(2);
+        if (res[0].stock_quantity >= amount) {
             // enough items
-            updateDB(res);
+            console.log("-".repeat(45));
+            console.log("Your Order:\n%d x %s\nTotal: $%f",amount,res[0].product_name,total);
+            console.log("-".repeat(45));
+            updateDB(res)
         } else {
             // not enough items
             cancelOrder();
