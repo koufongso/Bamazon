@@ -93,14 +93,11 @@ function processOrder(order) {
         if (err) throw err;
         // console.log(res);
         var amount = order.amount;
+        var name = res[0].product_name;
         var unitPrice = res[0].price;
-        var total = (amount * unitPrice).toFixed(2);
         if (res[0].stock_quantity >= amount) {
             // enough items
-            console.log("-".repeat(45));
-            console.log("Your Order:\n%d x %s\nTotal: $"+total, amount, res[0].product_namen);
-            console.log("-".repeat(45));
-            updateDB(id, amount);
+            updateDB(id, name, unitPrice, amount);
         } else {
             // not enough items
             cancelOrder();
@@ -109,12 +106,14 @@ function processOrder(order) {
 }
 
 
-function updateDB(id, amount) {
-    console.log("updating database...");
+function updateDB(id, name, unitPrice, amount) {
     var query = "UPDATE products SET stock_quantity=stock_quantity-? WHERE item_id=?";
     connection.query(query, [amount, id], function (err) {
         if (err) throw err;
-        console.log("database updated!");
+        console.log("Your order has been placed!");
+        console.log("-".repeat(45));
+        console.log("Your Order:\n%d x %s\nTotal: $"+(unitPrice*amount).toFixed(2), amount, name);
+        console.log("-".repeat(45));
 
         inquirer
             .prompt([{
