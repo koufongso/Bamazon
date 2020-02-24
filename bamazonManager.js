@@ -25,7 +25,7 @@ function run() {
             type: "list",
             name: "cmd",
             message: "choose one of them",
-            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
+            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product","Exit"]
         }])
         .then(answers => {
             switch (answers.cmd) {
@@ -35,9 +35,11 @@ function run() {
                 case "View Low Inventory":
                     viewItems_Low();
                     break;
+                case "Add to Inventory":
+                    restockItem();
+                    break;
                 default:
-                    "Not recongized command";
-                    run();
+                    connection.end();
             }
         });
 }
@@ -55,9 +57,10 @@ function viewItems() {
 function viewItems_Low() {
     var query = "SELECT * FROM products WHERE stock_quantity<?";
     connection.query(query, [THRESHOLD_QUANTITIES_LOW], function (err, res) {
-        if(err) throw err;
+        if (err) throw err;
         display(res);
-    })
+        run();
+    });
 }
 
 
@@ -79,4 +82,43 @@ function display(res) {
         console.log(id + " ".repeat(d1) + name + "-".repeat(d2) + "$" + price + " ".repeat(d3) + quantity);
     }
     console.log("*".repeat(100) + "\n");
+}
+
+function restockItem() {
+    inquirer
+        .prompt([
+            {
+                name: "id",
+                message: "Please enter the id of the product that you want to resupply.",
+                validate: function (input) {
+                    // input must greter than 0, and must be integer
+                    // for simplicity, not checking if input id is out of bound here
+                    return input > 0 && Number.isInteger(parseFloat(input));
+                }
+            },
+            {
+                name: "amount",
+                message: "How many do you want to add?",
+                validate: function (input) {
+                    return !isNaN(parseInt(input)) && input > 0 && Number.isInteger(parseFloat(input));
+                }
+            }
+        ])
+        .then(answers =>{
+            updateDB(answers.id,answers.amount)
+        });
+}
+
+
+function updateDB(id, amount) {
+    var query = "UPDATE products SET stock_quantity=stock_quantity+? WHERE item_id=?";
+    connection.query(query, [amount, id], function (err,res) {
+        if (err) throw err;
+        if(res.changedRows == 1){
+            console.log("You have add %d unit",amount)
+        }else{
+            console.log("Product not found.")
+        }
+        run();
+    });
 }
