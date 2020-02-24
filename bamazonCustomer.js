@@ -95,9 +95,11 @@ function processOrder(order) {
         var amount = order.amount;
         var name = res[0].product_name;
         var unitPrice = res[0].price;
+        var dep = res[0].department_name;
         if (res[0].stock_quantity >= amount) {
             // enough items
             updateDB(id, name, unitPrice, amount);
+            updateDep(dep, unitPrice, amount);
         } else {
             // not enough items
             cancelOrder();
@@ -106,13 +108,13 @@ function processOrder(order) {
 }
 
 
-function updateDB(id, name, unitPrice, amount) {
+function updateDB(id, name, unitPrice, amount, dep) {
     var query = "UPDATE products SET stock_quantity=stock_quantity-? WHERE item_id=?";
     connection.query(query, [amount, id], function (err) {
         if (err) throw err;
         console.log("Your order has been placed!");
         console.log("-".repeat(45));
-        console.log("Your Order:\n%d x %s\nTotal: $"+(unitPrice*amount).toFixed(2), amount, name);
+        console.log("Your Order:\n%d x %s\nTotal: $" + (unitPrice * amount).toFixed(2), amount, name);
         console.log("-".repeat(45));
 
         inquirer
@@ -130,6 +132,15 @@ function updateDB(id, name, unitPrice, amount) {
             });
     });
 }
+
+function updateDep(dep, unitPrice, amount) {
+    var query = "UPDATE departments SET product_sales=product_sales+? WHERE department_name=?";
+    connection.query(query, [(unitPrice * amount).toFixed(2), dep], function (err) {
+        if (err) throw err;
+    });
+}
+
+
 
 function cancelOrder() {
     inquirer
