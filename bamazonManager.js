@@ -129,17 +129,26 @@ function updateDB(id, amount) {
 
 
 function addNewItem() {
-    inquirer
+    // get the department list
+    var query ="SELECT department_name FROM departments"
+    connection.query(query,function(err,res){
+        if(err) throw err;
+        var depList =[];
+        for(var i = 0; i<res.length;i++){
+            depList.push(res[i].department_name);
+        }
+        
+        inquirer
         .prompt([
             {
                 name: "name",
                 message: "Please enter the name of the new product that you want to add."
             },
             {
-                // for now, just manually tpye in the department name
-                // OPTION: show the list of all the predefined department and let users to choose
+                type: "rawlist",
                 name: "department",
-                message: "What is the department this product belongs to?"
+                message: "What is the department this product belongs to?",
+                choices: depList
             },
             {
                 name: "price",
@@ -161,6 +170,7 @@ function addNewItem() {
         .then(answers => {
             insertDB(answers.name, answers.department, answers.price, answers.amount);
         });
+    })
 }
 
 function insertDB(name, department, price, amount) {
