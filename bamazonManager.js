@@ -25,7 +25,7 @@ function run() {
             type: "list",
             name: "cmd",
             message: "choose one of them",
-            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product","Exit"]
+            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Exit"]
         }])
         .then(answers => {
             switch (answers.cmd) {
@@ -38,7 +38,11 @@ function run() {
                 case "Add to Inventory":
                     restockItem();
                     break;
+                case "Add New Product":
+                    addNewItem();
+                    break;
                 default:
+                    console.log("Exit program!")
                     connection.end();
             }
         });
@@ -104,21 +108,66 @@ function restockItem() {
                 }
             }
         ])
-        .then(answers =>{
-            updateDB(answers.id,answers.amount)
+        .then(answers => {
+            updateDB(answers.id, answers.amount)
         });
 }
 
 
 function updateDB(id, amount) {
     var query = "UPDATE products SET stock_quantity=stock_quantity+? WHERE item_id=?";
-    connection.query(query, [amount, id], function (err,res) {
+    connection.query(query, [amount, id], function (err, res) {
         if (err) throw err;
-        if(res.changedRows == 1){
-            console.log("You have add %d unit",amount)
-        }else{
+        if (res.changedRows == 1) {
+            console.log("You have add %d unit", amount)
+        } else {
             console.log("Product not found.")
         }
+        run();
+    });
+}
+
+
+function addNewItem() {
+    inquirer
+        .prompt([
+            {
+                name: "name",
+                message: "Please enter the name of the new product that you want to add."
+            },
+            {
+                // for now, just manually tpye in the department name
+                // OPTION: show the list of all the predefined department and let users to choose
+                name: "department",
+                message: "What is the department this product belongs to?"
+            },
+            {
+                name: "price",
+                message: " What is the unit price?",
+                validate: function (input) {
+                    // price must be a positive number
+                    return !isNaN(parseFloat(input)) && input > 0;
+                }
+            },
+            {
+                name: "amount",
+                message: "How many do you want to add?",
+                validate: function (input) {
+                    // quantity must be a positive integer
+                    return !isNaN(parseInt(input)) && input > 0 && Number.isInteger(parseFloat(input));
+                }
+            }
+        ])
+        .then(answers => {
+            insertDB(answers.name, answers.department, answers.price, answers.amount);
+        });
+}
+
+function insertDB(name, department, price, amount) {
+    var query = " INSERT INTO products SET ?";
+    connection.query(query, { product_name: name, department_name: department, price: price, stock_quantity: amount }, function (err) {
+        if (err) throw err;
+        console.log("Added %s into the products database!", name);
         run();
     });
 }
