@@ -54,4 +54,28 @@ VALUES("Apple MacBook Air - Silver","Computers & Accessories",749.99,50);
 INSERT INTO products(product_name,department_name,price,stock_quantity)
 VALUES("Lenovo Flex 14 2-in-1 Convertible Laptop","Computers & Accessories",528.98,50);
 
+USE bamazonDB;
 SELECT * FROM products;
+
+###########################################################################################
+CREATE TABLE departments(
+	department_id INT NOT NULL AUTO_INCREMENT,
+    department_name VARCHAR(64) NOT NULL,
+    over_head_costs DECIMAL(10,2) NOT NULL,
+    product_sales  DECIMAL(65,2) DEFAULT 0.00 ,
+    PRIMARY KEY(department_id)
+);
+
+INSERT INTO departments(department_name,over_head_costs)
+VALUES("Grocery & Food", 10000.00);
+
+INSERT INTO departments(department_name,over_head_costs)
+VALUES("Books", 20000.00);
+
+INSERT INTO departments(department_name,over_head_costs)
+VALUES("Video Games", 30000.00);
+
+INSERT INTO departments(department_name,over_head_costs)
+VALUES("Computers & Accessories", 40000.00);
+
+SELECT * FROM departments
