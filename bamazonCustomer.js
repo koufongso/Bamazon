@@ -28,8 +28,7 @@ function showItems() {
         console.log("Here's the list of all the products for sale!\n")
         console.log("Id" + " ".repeat(6) + "Product Name" + " ".repeat(70 - 12) + "Price");
         console.log("*".repeat(90));
-        var idMax = res.length;
-        for (var i = 0; i < idMax; i++) {
+        for (var i = 0; i < res.length; i++) {
             var item = res[i];
             var id = item.item_id.toString();
             var name = item.product_name;
@@ -42,12 +41,12 @@ function showItems() {
         }
         console.log("*".repeat(90) + "\n");
 
-        placeOrder(idMax);
+        placeOrder();
     });
 }
 
 
-function placeOrder(idMax) {
+function placeOrder() {
     inquirer
         .prompt([{
             type: "confirm",
@@ -62,8 +61,8 @@ function placeOrder(idMax) {
                             name: "id",
                             message: "Please enter the product id.",
                             validate: function (input) {
-
-                                return input <= idMax && input > 0 && Number.isInteger(parseFloat(input));
+                                // input must be positive integer
+                                return input > 0 && Number.isInteger(parseFloat(input));
                             }
                         },
                         {
@@ -92,23 +91,28 @@ function processOrder(order) {
     connection.query(query, [id], function (err, res) {
         if (err) throw err;
         // console.log(res);
-        var amount = order.amount;
-        var name = res[0].product_name;
-        var unitPrice = res[0].price;
-        var dep = res[0].department_name;
-        if (res[0].stock_quantity >= amount) {
-            // enough items
-            updateDB(id, name, unitPrice, amount);
-            updateDep(dep, unitPrice, amount);
-        } else {
-            // not enough items
-            cancelOrder();
+        if(res.length!=0){
+            var amount = order.amount;
+            var name = res[0].product_name;
+            var unitPrice = res[0].price;
+            var dep = res[0].department_name;
+            if (res[0].stock_quantity >= amount) {
+                // enough items
+                updateDB(id, name, unitPrice, amount);
+                updateDep(dep, unitPrice, amount);
+            } else {
+                // not enough items
+                cancelOrder();
+            }
+        }else{
+            console.log("Product not found. Make sure you enter the correct product id.");
+            placeOrder();
         }
     });
 }
 
 
-function updateDB(id, name, unitPrice, amount, dep) {
+function updateDB(id, name, unitPrice, amount) {
     var query = "UPDATE products SET stock_quantity=stock_quantity-? WHERE item_id=?";
     connection.query(query, [amount, id], function (err) {
         if (err) throw err;
