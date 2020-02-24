@@ -73,3 +73,29 @@ function display(res) {
     }
     console.log("\n");
 }
+
+
+function createNewDep() {
+    inquirer
+        .prompt([{
+            name: "name",
+            message: "Please enter the name of the new department."
+        },
+        {
+            name:"overHead",
+            message:"What is the overHead of the new department?",
+            validate: function(input){
+                // must a positive number
+                return !isNaN(parseFloat(input)) && input > 0;
+            }
+        }])
+        .then(answers => {
+            var query = " INSERT INTO departments SET ?";
+            var name = answers.name
+            connection.query(query, { department_name: name, over_head_costs: answers.overHead}, function (err) {
+                if (err) throw err;
+                console.log("Added new department '%s'!", name);
+                run();
+            });
+        })
+}
