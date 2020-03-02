@@ -78,4 +78,3 @@ VALUES("Video Games", 30000.00);
 INSERT INTO departments(department_name,over_head_costs)
 VALUES("Computers & Accessories", 40000.00);
 
-SELECT * FROM departments
