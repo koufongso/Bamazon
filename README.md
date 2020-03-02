@@ -35,6 +35,8 @@
     * If the current quantities is less than the order amount, it will not place the order and the database will not get affected. 
     ![customer-out-of-stock](/demo/demo-customer-out-of-stock.gif)
 
-*  `bamazonManager.js`
-    ![manager-view](/demo/demo-manager)
+* `bamazonManager.js`
+    ![manager-view](/demo/demo-manager.gif)
+
+* `bamazonSupervisor.js`
     
