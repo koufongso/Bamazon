@@ -25,12 +25,12 @@
 
 ### Demo
 * First the database needs to be set up in mySQL by runing the mySQP script file. 
-    ![database-products](/demo/demo-database-products.png) 
-    ![database-departments](/demo/demo-database-departments)
+    ![database-products](/demo/demo-database-products.PNG) 
+    ![database-departments](/demo/demo-database-departments.PNG)
 
 * `bamazonzCustomer.js`
     * View product list and place order. It will also update the `products` table and the `departments` table. 
-    ![customer-normal](/demo/demo-customer-noraml.gif)
+    ![customer-normal](/demo/demo-customer-normal.gif)
 
     * If the current quantities is less than the order amount, it will not place the order and the database will not get affected. 
     ![customer-out-of-stock](/demo/demo-customer-out-of-stock.gif)
